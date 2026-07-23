@@ -360,6 +360,17 @@ export default function App() {
     const s = Math.floor((diff%60000)/1000);
     return `${d>0?d+"өдөр ":""}${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
   };
+
+  // Converts a stored UTC ISO timestamp into the "YYYY-MM-DDTHH:mm" format a
+  // <input type="datetime-local"> expects, correctly shown in LOCAL time
+  // (previously this just truncated the raw UTC string, showing it off by
+  // the timezone offset — e.g. midnight local showing as 4pm or similar).
+  const toLocalDatetimeInputValue = (isoString) => {
+    if (!isoString) return "";
+    const d = new Date(isoString);
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0,16);
+  };
   // eslint-disable-next-line no-unused-vars
   const _tick = nowTick; // re-render every second so countdown strings below stay live
   const timeLeft = formatCountdown(regDeadline) || "Бүртгэл хаагдсан";
@@ -1564,7 +1575,7 @@ export default function App() {
                     <div style={{fontWeight:700,fontSize:"15px",color:"var(--gold)",marginBottom:"10px"}}>Бүртгэлийн хугацаа</div>
                     <input
                       type="datetime-local"
-                      defaultValue={regDeadline ? regDeadline.slice(0,16) : ""}
+                      value={toLocalDatetimeInputValue(regDeadline)}
                       onChange={e=>{
                         const v = e.target.value;
                         if(v){
@@ -1602,7 +1613,7 @@ export default function App() {
                           </div>
                           <input
                             type="datetime-local"
-                            defaultValue={dl ? dl.slice(0,16) : ""}
+                            value={toLocalDatetimeInputValue(dl)}
                             onChange={async e=>{
                               const v = e.target.value;
                               if(v){
