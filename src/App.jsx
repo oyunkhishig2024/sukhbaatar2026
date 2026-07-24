@@ -450,6 +450,19 @@ export default function App() {
     try { setTaviachIssued(await getTaviachIssuedCounts()); } catch(e){ console.error(e); }
   };
 
+  // If this age group's taviach pool is exhausted, there's no real choice left —
+  // auto-answer "Үгүй" instead of leaving it unset (which used to surface a
+  // confusing "fill out all fields" error even though nothing was actually
+  // left to fill in).
+  useEffect(() => {
+    if (!selectedAge || screen !== "horseForm") return;
+    const issued = taviachIssued[String(selectedAge.id)] || 0;
+    const exhausted = issued >= MAX_TAVIACH_PER_AGE;
+    if (exhausted && hForm.taviachRequested === undefined) {
+      setHForm(f => ({...f, taviachRequested:false, taviachNum:0}));
+    }
+  }, [selectedAge, taviachIssued, screen, hForm.taviachRequested]);
+
   // Safety net: if the user leaves the horse form by ANY route (header nav tabs,
   // browser back, etc.) — not just the in-form "← Буцах" button — while holding a
   // taviach number that was never actually submitted, release it back into that
